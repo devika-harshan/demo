@@ -1,0 +1,48 @@
+// import 'package:demo/timerpage.dart';
+import 'package:demo/timerpage.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class Log extends StatefulWidget {
+  const Log({super.key});
+  _LogState createState() => _LogState();
+}
+
+class _LogState extends State<Log> {
+  String? userName;
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+            body: Column(
+      children: [
+        Container(child: TextField(
+          onChanged: (value) {
+            setState(() {
+              userName = value;
+            });
+          },
+        )),
+        Builder(builder: (context) {
+          return ElevatedButton(
+              onPressed: () {
+                if (userName != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TimerPage(currentUser: userName!)),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                    content: Text("The Username can't be empty"),
+                    duration: Duration(seconds: 3),
+                  ));
+                }
+              },
+              child: Text('Continue'));
+        })
+      ],
+    )));
+  }
+}
