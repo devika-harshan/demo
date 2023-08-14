@@ -1,0 +1,67 @@
+import 'package:demo/userslistScreen.dart';
+import 'package:flutter/material.dart';
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
+class TimerPage extends StatefulWidget {
+  final currentUser;
+  const TimerPage({Key? key, required this.currentUser}) : super(key: key);
+  _TimerPageState createState() => _TimerPageState();
+}
+
+class _TimerPageState extends State<TimerPage> {
+  final Stopwatch _stopwatch = Stopwatch();
+  late Timer _timer;
+  String _result = '00:00:00';
+
+  void _start() {
+    _timer = Timer.periodic(const Duration(milliseconds: 30), (Timer t) {
+      setState(() {
+        _result =
+            '${_stopwatch.elapsed.inMinutes.toString().padLeft(2, '0')}:${(_stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, '0')}:${(_stopwatch.elapsed.inMilliseconds % 100).toString().padLeft(2, '0')}';
+      });
+    });
+
+    _stopwatch.start();
+  }
+
+  void _stop() async {
+    _timer.cancel();
+    _stopwatch.stop();
+    await FirebaseFirestore.instance.collection('Users').add({
+      'uname': widget.currentUser,
+      'time': _result,
+    });
+  }
+
+  @override
+  void dispose() {
+    _stopwatch.stop();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+        home: Scaffold(
+            body: Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: <Widget>[
+        Text(_result),
+        ElevatedButton(onPressed: _start, child: Text("start")),
+        ElevatedButton(onPressed: _stop, child: Text("stop")),
+        ElevatedButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => UsersListScreen()),
+              );
+            },
+            child: Text("save")),
+      ],
+    )));
+  }
+}
+// class ProviderDemo with ChangeNotifier {
+//   String elaptime = _result;
+// }
