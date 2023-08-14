@@ -1,0 +1,59 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:demo/userprovider.dart';
+
+class UsersListScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final usersProvider = Provider.of<UsersProvider>(context);
+
+    if (usersProvider.usersData.isEmpty) {
+      usersProvider.fetchData();
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Users List'),
+      ),
+      body: usersProvider.usersData.isEmpty
+          ? Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 10.0),
+                width: MediaQuery.of(context).size.width,
+                child: DataTable(
+                  headingTextStyle: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 19,
+                    color: Colors.black,
+                  ),
+                  dataTextStyle: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 14,
+                      color: Colors.black),
+                  columns: [
+                    DataColumn(label: Text('Username')),
+                    DataColumn(label: Text('Time')),
+                  ],
+                  rows: usersProvider.usersData.map((userData) {
+                    final uname = userData['uname'] as String;
+                    final time = userData['time'] as String;
+
+                    return DataRow(cells: [
+                      DataCell(Text(uname)),
+                      DataCell(Text(time)),
+                    ]);
+                  }).toList(),
+                ),
+              ),
+            ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          usersProvider.fetchData();
+        },
+        child: Icon(Icons.refresh),
+      ),
+    );
+  }
+}
